@@ -7,6 +7,7 @@ from enemy import *
 import math
 import time
 from button import Button
+import traceback
 
 from powerup import *
 
@@ -45,7 +46,7 @@ class Game:
         self.powerup_land_noise.set_volume(0.18*master)
         self.powerup_collect_noise = pygame.mixer.Sound(c.sounds_path("powerup_collect.wav"))
         self.powerup_collect_noise.set_volume(0.32*master)
-        pygame.mixer.music.load(c.sounds_path("music_v1.ogg"))
+        pygame.mixer.music.load(c.sounds_path("music_v1.wav"))
         pygame.mixer.music.play(-1)
 
         pygame.display.set_caption("Spinnerets")
@@ -700,4 +701,10 @@ class RoomScene(Scene):
 
 
 if __name__ == '__main__':
-    Game().main()
+    try:
+        Game().main()
+    except Exception as e:
+        with open("error_log.txt", "a") as f:
+            line = traceback.format_exc()
+            f.write("\n"+"-"*20+"\n")
+            f.write(line)
