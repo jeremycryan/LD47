@@ -1,0 +1,11 @@
+XXXXXXXXXXXXXXXXXXXX
+XXXX............XXXX
+X....P......4......X
+D.1..............P.D
+D...XXX......XXX...D
+D...XXX...P..XXX...D
+D...XXX......XXX...D
+X.P..............2.X
+X......3......P....X
+XXXX............XXXX
+XXXXXXXXXXXXXXXXXXXX
