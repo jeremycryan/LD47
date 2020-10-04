@@ -130,7 +130,9 @@ class BlockingTile(Tile):
     def only_edges(self, neighbors):
         return [item=="X" for item in (neighbors[0][1], neighbors[1][0], neighbors[2][1], neighbors[1][2])]
 
-
+class BreakableTile(BlockingTile):
+    def __init__(self, *args, **kwargs):
+        super.__init__(*args,**kwargs)
 
 class Door(BlockingTile):
     def __init__(self, *args, **kwargs):
@@ -166,7 +168,7 @@ class Room:
             for x, char in enumerate(line):
                 if char == "X" or char=="D":
                     room.objects[y][x].append(BlockingTile(game, room, (x, y)))
-                if char in [".", "X", "D", "1", "2", "3", "4", "P"]:
+                if char in [".", "X", "D", "1", "2", "3", "4", "P","B"]:
                     room.objects[y][x].append(EmptyTile(game, room, (x, y)))
                     if char in ["1", "2", "3", "4"]:
                         room.spawns[int(char)] = room.cell_to_world(x, y)

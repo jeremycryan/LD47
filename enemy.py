@@ -54,6 +54,8 @@ class Enemy:
                     if self.game.room.cell_is_blocking(cell_x, cell_y):
                         real_x, real_y = self.game.room.cell_to_world(cell_x, cell_y)
                         do_break = self.bump_tile(real_x, real_y)
+                        if do_break and hasattr(self, "bounces"):
+                            self.game.bounce_noise.play()
                     if do_break:
                         break
                 if do_break:
@@ -63,7 +65,7 @@ class Enemy:
         dx = x - self.x
         dy = y - self.y
         if math.sqrt(dx**2 + dy**2) > 1.5 * c.TILE_SIZE + self.radius:
-            return
+            return False
         else:
             did_something = False
             decel = 0.2

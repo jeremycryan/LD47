@@ -29,6 +29,7 @@ class Powerup:
                 self.y_offset = 0
                 self.landed = True
                 self.game.current_scene.shake(5)
+                self.game.powerup_land_noise.play()
         self.check_collisions()
 
     def draw(self, surface, offset=(0, 0)):
@@ -55,6 +56,7 @@ class Powerup:
                 break
 
     def collected_by(self, player):
+        self.game.powerup_collect_noise.play()
         self.game.powerups.remove(self)
 
 

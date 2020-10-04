@@ -10,6 +10,9 @@ def rooms_path(rel):
 def fonts_path(rel):
     return os.path.join("fonts", rel)
 
+def sounds_path(rel):
+    return os.path.join("sounds", rel)
+
 def mag(*args):
     """ Magnitude of any number of axes """
     n = len(args)

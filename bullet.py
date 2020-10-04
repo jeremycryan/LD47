@@ -28,7 +28,7 @@ class Bullet:
         self._check_tile_collisions = Enemy.check_tile_collisions
 
     def bump_tile(self, *args, **kwargs):
-        self._bump_tile(self, *args, **kwargs)
+        return self._bump_tile(self, *args, **kwargs)
 
     def check_tile_collisions(self):
         self._check_tile_collisions(self)
@@ -58,6 +58,7 @@ class Bullet:
         self.game.bullets.remove(self)
         BulletHit(self.game, position=(self.x, self.y))
         self.game.current_scene.shake(3)
+        self.game.bullet_destroyed_noise.play()
 
     def draw(self, surface, offset=(0, 0)):
         surf = pygame.transform.rotate(self.surf, self.angle)

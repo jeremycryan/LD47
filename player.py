@@ -122,6 +122,7 @@ class Player:
     def bump_vel(self, x, y):
         self.velocity[0] += x
         self.velocity[1] += y
+        self.game.bounce_noise.play()
         if self.dead:
             self.props[SPIN_SPEED] = random.random() * 240 - 120
 
@@ -171,13 +172,16 @@ class Player:
                 for cell_y in [y-1, y, y+1]:
                     if self.game.room.cell_is_blocking(cell_x, cell_y):
                         real_x, real_y = self.game.room.cell_to_world(cell_x, cell_y)
-                        self.bump_tile(real_x, real_y)
+                        if self.bump_tile(real_x, real_y):
+                            if c.mag(*self.velocity) > 5:
+                                self.game.bounce_noise.play()
+                            return
 
     def bump_tile(self, x, y):
         dx = x - self.x
         dy = y - self.y
         if math.sqrt(dx**2 + dy**2) > 1.5 * c.TILE_SIZE + self.radius:
-            return
+            return False
         else:
             did_something = False
             decel = 0.4
@@ -234,6 +238,7 @@ class Player:
                     self.get_hit_by(bullet)
 
     def get_hit_by(self, bullet):
+        self.game.player_hurt_noise.play()
         self.hp -= bullet.damage
         self.since_damage = 0
 
@@ -255,6 +260,7 @@ class Player:
         self.charging = 0
         self.controller.disabled = True
         self.dead = True
+        self.effects = []
         for i in range(8):
             angle = i/8 * 2 * math.pi + self.angle*math.pi/180
             speed = random.random()**2*140 + 60
@@ -308,6 +314,10 @@ class Player:
         self.bind_key(None)
 
     def update(self, dt, events):
+        x, y, w, h = self.game.room.get_rect()
+        if self.x > x+w or self.y > y+h or self.x < x or self.y < y:
+            self.x, self.y = c.WINDOW_WIDTH//2, c.WINDOW_HEIGHT//2
+            pygame.display.set_caption("Spinneret (definitely not riddled with bugs)")
         for effect in self.effects[::-1]:
             effect.update(dt, events)
         self.since_damage += dt
@@ -411,6 +421,7 @@ class Player:
         if self.has_powerup(c.DOUBLE_SHOT):
             offsets = [-15, 15]
 
+        self.game.shoot_noise.play()
         for offset in offsets:
             self.angle += offset
             x, y = self.get_direction_vector()
