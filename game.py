@@ -48,13 +48,13 @@ class Game:
         pygame.mixer.music.load(c.sounds_path("music_v1.ogg"))
         pygame.mixer.music.play(-1)
 
-        pygame.display.set_caption("Spinneret")
+        pygame.display.set_caption("Spinnerets")
 
         self.key_list = []
         self.skin_list = []
         self.win_list = []
 
-        self.current_scene = CharacterSelect(self)#RoomScene(self)
+        self.current_scene = LD47Scene(self)#RoomScene(self)
 
     def reset_room(self):
         self.powerups = []
@@ -426,8 +426,15 @@ class ResultsScreen(Scene):
 
             self.countdown -= dt
 
-            if self.countdown <= 0:
+            if self.countdown <= 0and self.black_target_alpha <255:
                 self.black_target_alpha = 255
+                self.game.cut_off_noise.play()
+
+            for event in events:
+                if event.type == pygame.KEYDOWN:
+                    if event.key in self.game.key_list:
+                        self.countdown = int(self.countdown)
+                        self.game.button_noise.play()
 
             self.screen.fill((20, 20, 20))
             self.draw_lines(self.screen)
@@ -473,13 +480,63 @@ class ResultsScreen(Scene):
                 self.over=True
                 self.game.next_scene = RoomScene(self.game)
 
+class StarFishScene(Scene):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.logo = pygame.image.load(c.image_path("star_fish.png"))
+        self.logo = pygame.transform.scale2x(self.logo)
+        self.age = 0
+        self.black = pygame.Surface(c.WINDOW_SIZE)
+        self.black.fill((0, 0, 0))
+        self.duration = 2.5
+        self.angle = -self.duration//2 * 8
+
+    def next_scene(self):
+        return CharacterSelect(self.game)
+
+    def main(self):
+        duration = self.duration
+        while True:
+            dt, events = self.game.update_globals()
+            self.age += dt
+            self.screen.fill((0, 0, 0))
+            self.angle += dt*10
+            logo = pygame.transform.rotate(self.logo, self.angle)
+            x = c.WINDOW_WIDTH//2 - logo.get_width()//2
+            y = c.WINDOW_HEIGHT//2 - logo.get_height()//2
+            self.screen.blit(logo, (x, y))
+            fadein = 0.5
+            fadeout = 0.7
+            if self.age < fadein:
+                alpha = 255 - 255*self.age/fadein
+            elif self.age < duration - fadeout:
+                alpha = 0
+            else:
+                start = duration - fadeout
+                alpha = (self.age - start)/fadeout * 255
+            self.black.set_alpha(alpha)
+            self.screen.blit(self.black, (0, 0))
+            pygame.display.flip()
+
+            if self.age > duration:
+                self.game.next_scene = self.next_scene()
+                break
+
+class LD47Scene(StarFishScene):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.logo = pygame.image.load(c.image_path("ld47.png"))
+
+    def next_scene(self):
+        return StarFishScene(self.game)
+
 class RoomScene(Scene):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.skin_list = self.game.skin_list
         self.key_list = self.game.key_list
-        self.room_num = random.choice([1, 2, 3, 4])
+        self.room_num = random.choice([1, 2, 3, 4, 5, 6, 7])
         self.checking_inputs = False
         self.countdown = 3
         self.numbers = [self.game.get_static(c.image_path("1.png")),
@@ -495,8 +552,8 @@ class RoomScene(Scene):
     def random_powerup(self):
         weights = [(SlipperySocksPowerup, 10),
                     (FastSpinPowerup, 10),
-                    (DoubleShotPowerup, 5),
-                    (BouncyPowerup, 5)]
+                    (DoubleShotPowerup, 7),
+                    (BouncyPowerup, 7)]
         total = sum([i[1] for i in weights])
         choose = int(random.random() * total)
         pos = random.choice(self.game.room.powerup_spawns)
@@ -519,7 +576,6 @@ class RoomScene(Scene):
             player = Player(self.game, skin=skin, player_num=i+1)
             self.players.append(player)
             player.bind_key(self.key_list[i])
-        self.age = 0
 
         self.black = pygame.Surface(c.WINDOW_SIZE)
         self.black.fill((0, 0, 0))
@@ -529,6 +585,7 @@ class RoomScene(Scene):
         #self.game.powerups.append(BouncyPowerup(self.game, pos=(500,300)))
         #self.players[0].die()
         is_over = False
+        self.age = 0
 
         while True:
             dt, events = self.game.update_globals()
@@ -563,7 +620,6 @@ class RoomScene(Scene):
                 self.countdown -= dt
                 if self.countdown <= 0.5:
                     self.checking_inputs = True
-                    self.countdown = 2000000
 
             self.update_powerup_spawning(dt, events)
 

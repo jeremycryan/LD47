@@ -1,0 +1,14 @@
+XXXXXXXXDDDDXXXXXXXX
+XXB..............BXX
+XB................BX
+X..P.....XX.....P..X
+X......1.XX.4......X
+X........XX........X
+X...BBXXXXXXXXBB...X
+X...BBXXXXXXXXBB...X
+X........XX........X
+X......3.XX.2......X
+X..P.....XX.....P..X
+XB................BX
+XXB..............BXX
+XXXXXXXXDDDDXXXXXXXX

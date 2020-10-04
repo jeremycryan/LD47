@@ -48,6 +48,7 @@ class Bullet:
             if self.game.room is not None:
                 x, y = self.game.room.world_to_cell(self.x, self.y, discrete=True)
                 if self.game.room.cell_is_blocking(x, y):
+                    self.game.room.break_if_breakable_at(x, y)
                     self.destroy()
         else:
             if self.game.room is not None:

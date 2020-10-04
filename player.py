@@ -317,7 +317,7 @@ class Player:
         x, y, w, h = self.game.room.get_rect()
         if self.x > x+w or self.y > y+h or self.x < x or self.y < y:
             self.x, self.y = c.WINDOW_WIDTH//2, c.WINDOW_HEIGHT//2
-            pygame.display.set_caption("Spinneret (definitely not riddled with bugs)")
+            pygame.display.set_caption("Spinnerets (definitely not riddled with bugs)")
         for effect in self.effects[::-1]:
             effect.update(dt, events)
         self.since_damage += dt

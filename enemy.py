@@ -56,6 +56,9 @@ class Enemy:
                         do_break = self.bump_tile(real_x, real_y)
                         if do_break and hasattr(self, "bounces"):
                             self.game.bounce_noise.play()
+                        if do_break:
+                            if self.game.room.break_if_breakable_at(cell_x, cell_y):
+                                self.destroy()
                     if do_break:
                         break
                 if do_break:

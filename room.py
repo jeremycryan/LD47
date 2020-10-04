@@ -120,7 +120,8 @@ class BlockingTile(Tile):
 
         x = self.x - c.TILE_SIZE//2 + offset[0] + 12
         y = self.y - c.TILE_SIZE//2 + offset[1] + 20
-        surface.blit(self.black_t, (x, y))
+        if not hasattr(self, "broken"):
+            surface.blit(self.black_t, (x, y))
         super().draw(surface, offset=offset)
 
     def four_edges(self, neighbors):
@@ -132,7 +133,29 @@ class BlockingTile(Tile):
 
 class BreakableTile(BlockingTile):
     def __init__(self, *args, **kwargs):
-        super.__init__(*args,**kwargs)
+        super().__init__(*args,**kwargs)
+        self.surface = self.game.get_static(c.image_path("breakable.png"))
+        self.surface = pygame.transform.scale2x(self.surface)
+        self.has_neighbored = True
+        self.broken = False
+        self.black = pygame.Surface((c.TILE_SIZE, c.TILE_SIZE))
+        self.black.fill((0, 0, 0))
+        self.black_t = self.black.copy()
+        self.black_t.set_alpha(40)
+        self.black_t.set_colorkey((255, 255, 255))
+
+    def break_me(self):
+        self.broken = True
+        self.blocking = False
+
+    def draw(self, surface, offset=(0, 0)):
+        if self.broken:
+            return
+        else:
+            x = self.x - c.TILE_SIZE//2 + offset[0] + 6
+            y = self.y - c.TILE_SIZE//2 + offset[1] + 10
+            surface.blit(self.black_t, (x, y))
+            super().draw(surface, offset=offset)
 
 class Door(BlockingTile):
     def __init__(self, *args, **kwargs):
@@ -174,6 +197,8 @@ class Room:
                         room.spawns[int(char)] = room.cell_to_world(x, y)
                     if char in ["P"]:
                         room.powerup_spawns.append(room.cell_to_world(x, y))
+                    if char in ["B"]:
+                        room.objects[y][x].append(BreakableTile(game, room, (x, y)))
                 # if char == "D":
                 #     door = Door(game, room, (x, y))
                 #     room.objects[y][x].append(door)
@@ -185,6 +210,14 @@ class Room:
         h = self.height * c.TILE_SIZE
         x, y = self.cell_to_world(-0.5, -0.5)
         return (x, y, w, h)
+
+    def break_if_breakable_at(self, x, y):
+        tiles = self.objects[y][x]
+        for tile in tiles:
+            if type(tile) == BreakableTile:
+                tile.break_me()
+                return True
+        return False
 
     def neighbors(self, x0, y0):
         array = [[[] for _ in range(3)] for _ in range(3)]
